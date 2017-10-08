@@ -62,7 +62,8 @@ const MyMapComponent = compose(
 class Map extends React.PureComponent {
     state = {
         markers : [],
-        markerHeaders : []
+        markerHeaders : [],
+        isOpenArray: [],
     }
 
 
