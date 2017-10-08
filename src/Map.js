@@ -8,19 +8,12 @@ const parse = require('csv-parse/lib/sync');
 
 let lat_label;
 let lon_label;
-let lat_labels = ['lat', 'latitudine', 'latitude'];
-let lon_labels = ['lon', 'longitudine', 'lng', 'longitude'];
+let lat_labels = ['lat', 'latitudine', 'latitude', 'latitudine_v', 'latitudine_p'];
+let lon_labels = ['lon', 'longitudine', 'lng', 'longitude','longitudine_v', 'longitudine_p'];
 
 
 
 const MyMapComponent = compose(
-    withStateHandlers(() => ({
-        isOpen: false,
-    }), {
-        onToggleOpen: ({ isOpen }) => () => ({
-            isOpen: !isOpen,
-        })
-    }),
     withProps({
         googleMapURL: "https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places",
         loadingElement: <div style={{ height: `100%` }} />,
@@ -35,9 +28,10 @@ const MyMapComponent = compose(
         defaultCenter={{ lat: 43.109965, lng: 12.388408 }}
     >
 
-        {props.markers.length > 0 && props.markers.map((marker) =>
-            <Marker position={{ lat:parseFloat(marker[lat_label]) , lng: parseFloat(marker[lon_label]) }} onClick={props.onToggleOpen} >
-                {props.isOpen && <InfoWindow onCloseClick={props.onToggleOpen}>
+        {props.markers.length > 0 && props.markers.map((marker,indice) =>
+            <Marker position={{ lat:parseFloat(marker[lat_label]) , lng: parseFloat(marker[lon_label]) }} onClick={() => props.onMarkerClick(indice)}>
+                {console.log(props.isOpen)}
+                {props.isOpen == indice && <InfoWindow onCloseClick={() => props.onMarkerClick(-1)}>
                     <div>
                         {props.markerHeaders.map((header) =>
                             <div>
@@ -45,8 +39,8 @@ const MyMapComponent = compose(
                             </div>
                         )}
                     </div>
-                </InfoWindow>
-                }
+                </InfoWindow>}
+
             </Marker>
         )}
 
@@ -63,15 +57,15 @@ class Map extends React.PureComponent {
     state = {
         markers : [],
         markerHeaders : [],
-        isOpenArray: [],
+        isOpen: -1
     }
 
 
     componentDidMount() {
     }
 
-    handleMarkerClick = () => {
-        this.setState({});
+    handleMarkerClick = (indice) => {
+        this.setState({isOpen: indice});
     }
 
 
@@ -86,6 +80,10 @@ class Map extends React.PureComponent {
         return "";
     };
 
+    changeStatus = (status) => {
+        return !status;
+    }
+
     nomeParametri  = (oggetto) => {
         return Object.keys(oggetto);
     }
@@ -98,7 +96,7 @@ class Map extends React.PureComponent {
             let headers = this.nomeParametri(records[0]);
             lat_label = this.check_headers(headers, lat_labels);
             lon_label = this.check_headers(headers, lon_labels);
-
+            console.log()
 
             this.setState ({markers : records, markerHeaders:headers})
         }
@@ -118,6 +116,7 @@ class Map extends React.PureComponent {
                     onMarkerClick={this.handleMarkerClick}
                     markers={this.state.markers}
                     markerHeaders = {this.state.markerHeaders}
+                    isOpen = {this.state.isOpen}
                 />
 
             </div>
